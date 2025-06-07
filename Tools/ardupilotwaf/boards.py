@@ -505,23 +505,9 @@ class Board:
             Logs.pprint('RED', msg)
 
         if cfg.options.trusted_flight_issuer and cfg.options.trusted_flight_key:
-            if cfg.options.board != 'sitl':
-                # prepare a temp file to embed issuer string into ROMFS
-                artifacts = cfg.bldnode.make_node('trusted_flight_artifacts/' + f'{cfg.options.board}_romfs')
-                artifacts.mkdir()
-                trusted_flight_key_file = artifacts.make_node('key.pub').abspath()
-                trusted_flight_issuer_file = artifacts.make_node('issuer').abspath()
-                with open(trusted_flight_issuer_file, 'w') as f:
-                    f.write(cfg.options.trusted_flight_issuer.strip())
-
-                with open(trusted_flight_key_file, 'wb') as f:
-                    key = open(cfg.options.trusted_flight_key, 'rb').read()
-                    f.write(key)
-
-                env.ROMFS_FILES += [
-                    ('trusted_flight/key.pub', trusted_flight_key_file),
-                    ('trusted_flight/token_issuer', trusted_flight_issuer_file)
-                ]
+            env.TRUSTED_FLIGHT_KEY_TYPE = 1   # aligns with EdDSA in AP_TrustedFlught.h
+            env.TRUSTED_FLIGHT_KEY = cfg.options.trusted_flight_key
+            env.TRUSTED_FLIGHT_ISSUER = cfg.options.trusted_flight_issuer.encode()
 
             env.DEFINES.update(
                 AP_JWT_ENABLED=1,

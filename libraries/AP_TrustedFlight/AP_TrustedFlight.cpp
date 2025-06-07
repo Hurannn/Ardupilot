@@ -21,7 +21,6 @@
 
 #include <AP_Filesystem/AP_Filesystem.h>
 #include <AP_Logger/AP_Logger.h>
-#include <AP_ROMFS/AP_ROMFS.h>
 #include "AP_TrustedFlight.h"
 #include "LogStructure.h"
 #include "AP_Jwt.h"
@@ -41,17 +40,11 @@ AP_TrustedFlight::AP_TrustedFlight()
 AP_TrustedFlight::~AP_TrustedFlight()
 {
     if (public_key)
-#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
         delete public_key;
-#else
-        AP_ROMFS::free(public_key);
-#endif
     if (token_issuer)
-#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
         delete token_issuer;
-#else
-        AP_ROMFS::free(token_issuer);
-#endif
+    public_key = nullptr;
+    token_issuer = nullptr;
 }
 
 // Aerobridge Trusted Flight module init
@@ -65,30 +58,29 @@ void AP_TrustedFlight::init()
     if (AP::logger()._params.log_disarmed == AP_Logger::LogDisarmed::NONE)
         AP::logger()._params.log_disarmed.set(AP_Logger::LogDisarmed::LOG_WHILE_DISARMED); //AP_Logger::LogDisarmed::LOG_WHILE_DISARMED_NOT_USB
 
-    // read public key
+    // read public key + token
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     if(!read_from_file(public_key_path, &public_key, &public_key_length))
-#else
-    public_key = AP_ROMFS::find_decompress(public_key_path, public_key_length);
-    if(!public_key)
-#endif
     {
         log_message("Failed to read public key\n");
         return;
     }
-
-    // read token issuer
-#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     if(!read_from_file(token_issuer_path, &token_issuer, &token_issuer_length))
-#else 
-    token_issuer = AP_ROMFS::find_decompress(token_issuer_path, token_issuer_length);
-    if(!token_issuer)
-#endif
     {
         log_message("Failed to read token issuer\n");
         return;
     }
-
+#else
+    if (app_descriptor.key_type != AP_TrustedFlight::PUBLIC_KEY_EdDSA)
+    {
+        log_message("Unsupported Public Key Type in app descriptor\n");
+        return;
+    }
+    public_key_length = app_descriptor.key_len;
+    public_key = app_descriptor.key;
+    token_issuer_length = app_descriptor.issuer_len;
+    token_issuer = app_descriptor.issuer;
+#endif
     init_done = true;
 }
 

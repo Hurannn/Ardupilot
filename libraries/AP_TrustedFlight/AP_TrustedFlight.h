@@ -22,10 +22,22 @@
 #if AP_TRUSTED_FLIGHT_ENABLED
 
 #include <AP_HAL/AP_HAL.h>
+#include <AP_CheckFirmware/AP_CheckFirmware.h>
+
+/*
+  app descriptor for public key and token issuer
+ */
+extern const app_descriptor_t app_descriptor;
 
 class AP_TrustedFlight
 {
 public:
+    enum KeyType
+    {
+        PUBLIC_KEY_None,
+        PUBLIC_KEY_EdDSA
+    };
+
     AP_TrustedFlight();
     ~AP_TrustedFlight();
     
@@ -65,10 +77,6 @@ private:
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     const char *public_key_path = HAL_BOARD_STORAGE_DIRECTORY "/trusted_flight/key.pub";
     const char *token_issuer_path = HAL_BOARD_STORAGE_DIRECTORY "/trusted_flight/token_issuer";
-#else
-    // paths in ROMFS
-    const char *public_key_path = "trusted_flight/key.pub";
-    const char *token_issuer_path = "trusted_flight/token_issuer";
 #endif
 
     const char *token_file_path = HAL_BOARD_STORAGE_DIRECTORY "/trusted_flight/token";
