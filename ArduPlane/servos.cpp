@@ -934,6 +934,12 @@ void Plane::set_servos(void)
     if (g2.ice_control.throttle_override(override_pct, base_throttle)) {
         // the ICE controller wants to override the throttle for starting, idle, or redline
         SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, override_pct);
+        // Inform TECS if we raised or lowered the throttle
+        if(override_pct < base_throttle) {
+            TECS_controller.set_throttle_max(override_pct);
+        } else if(override_pct > base_throttle) {
+            TECS_controller.set_throttle_min(override_pct);
+        }
 #if HAL_QUADPLANE_ENABLED
         quadplane.vel_forward.integrator = 0;
 #endif
