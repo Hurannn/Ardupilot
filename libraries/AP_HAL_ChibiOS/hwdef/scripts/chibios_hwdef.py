@@ -3106,7 +3106,8 @@ The %s is a flight controller designed and produced by [%s].
         f.write('''
 ## Features
 
- - MCU - %s 32-bit processor running at 480 MHz\n''' % self.mcu_type)
+ - MCU - %s 32-bit processor running at %u MHz\n''' % 
+ (self.mcu_type, 480 if self.mcu_series.startswith("STM32H7") else 216 if self.mcu_series.startswith("STM32F7") else 168))
         count = 1
         for dev in self.imu_list:
             f.write(' - IMU%u - %s\n' % (count, dev[0]))
@@ -3126,7 +3127,8 @@ The %s is a flight controller designed and produced by [%s].
             f.write(' - microSD card slot\n')
         serial_list = self.get_UART_list()
         f.write(' - %ux UARTs\n' % (len([item for item in serial_list if item != "EMPTY"]) - 1))
-        f.write(' - CAN support\n')
+        if self.have_type_prefix('CAN'):
+            f.write(' - CAN support\n')
         pwm = 0
         for label in self.bylabel.keys():
             p = self.bylabel[label]
@@ -3165,6 +3167,9 @@ receive pin for UARTn. The Tn pin is the transmit pin for UARTn.
                     protocol = "Spare"
             else:
                 protocol = protocol.removeprefix('SerialProtocol_')
+                protocol = protocol.replace('_', ' ')
+                if protocol == 'None':
+                    protocol = 'Spare'
             f.write(' - SERIAL%u -> %s (%s%s)\n' % (num, dev, protocol, ', DMA-enabled' if have_DMA else ''))
 
     def get_serial_protocol(self, protocol):
