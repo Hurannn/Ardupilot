@@ -82,7 +82,7 @@ void GCS_MAVLINK_Tracker::send_attitude_target()
         0,                // roll rate (rad/s)
         0,                // pitch rate (rad/s)
         yaw_rate_rads,    // yaw rate (rad/s)
-        0);               // Collective thrust, normalized to 0 .. 1
+        0);               // Collective thrust
 }
 
 void GCS_MAVLINK_Tracker::send_nav_controller_output() const
