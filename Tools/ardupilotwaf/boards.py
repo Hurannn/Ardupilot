@@ -1464,6 +1464,29 @@ class chibios(Board):
     def get_name(self):
         return self.name
 
+class NucleoH753ZI(chibios):
+    name = 'nucleo-h753zi'
+    def __init__(self):
+        super(NucleoH753ZI, self).__init__()
+        self.bootloader_str = 'NucleoH753ZI_bl.bin'
+        self.bootloader_flash_offset = 0x0
+
+    def configure_env(self, cfg, env):
+        super(NucleoH753ZI, self).configure_env(cfg, env)
+
+        env.BOARD = 'nucleo-h753zi'
+        env.BOARD_CLASS = 'ChibiOS'
+        env.HAL_BOARD = 'HAL_BOARD_CHIBIOS'
+        env.DEFINES.update(
+            HAL_BOARD_NUCLEO_H753ZI=1,
+            HAL_BOARD_CAN_DEFINE_ALL_MASKS=1,
+            HAL_HAVE_SAFETY_SWITCH=0,
+        )
+        env.AP_LIBRARIES += [
+            'AP_HAL_ChibiOS',
+        ]
+        env.ROMFS_EXCLUDE = []
+
 class linux(Board):
     def __init__(self):
         super().__init__()
