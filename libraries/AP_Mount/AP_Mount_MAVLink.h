@@ -5,7 +5,7 @@
 
 #include "AP_Mount_config.h"
 
-#if HAL_MOUNT_GREMSY_ENABLED
+#if HAL_MOUNT_GREMSY_ENABLED || HAL_MOUNT_AVT_ENABLED
 
 #include "AP_Mount_Backend.h"
 
@@ -73,4 +73,4 @@ private:
     mavlink_gimbal_device_attitude_status_t _gimbal_device_attitude_status;  // copy of most recently received gimbal status
     uint32_t _last_attitude_status_ms;  // system time last attitude status was received (used for health reporting)
 };
-#endif // HAL_MOUNT_GREMSY_ENABLED
+#endif // HAL_MOUNT_GREMSY_ENABLED || HAL_MOUNT_AVT_ENABLED

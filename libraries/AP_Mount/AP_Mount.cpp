@@ -188,6 +188,14 @@ void AP_Mount::init()
             serial_instance++;
             break;
 #endif // HAL_MOUNT_XFROBOT_ENABLED
+
+#if HAL_MOUNT_AVT_ENABLED
+        // check for AVT mounts
+        case Type::AVT:
+            _backends[instance] = NEW_NOTHROW AP_Mount_MAVLink(*this, _params[instance], instance);
+            _num_instances++;
+            break;
+#endif // HAL_MOUNT_AVT_ENABLED
         }
 
         // init new instance

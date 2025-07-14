@@ -1,6 +1,6 @@
 #include "AP_Mount_config.h"
 
-#if HAL_MOUNT_GREMSY_ENABLED
+#if HAL_MOUNT_GREMSY_ENABLED || HAL_MOUNT_AVT_ENABLED
 
 #include "AP_Mount_MAVLink.h"
 
@@ -325,4 +325,4 @@ void AP_Mount_MAVLink::send_gimbal_device_set_attitude(float roll_rad, float pit
     _link->send_message(MAVLINK_MSG_ID_GIMBAL_DEVICE_SET_ATTITUDE, (const char*)&pkt);
 }
 
-#endif // HAL_MOUNT_GREMSY_ENABLED
+#endif // HAL_MOUNT_GREMSY_ENABLED || HAL_MOUNT_AVT_ENABLED

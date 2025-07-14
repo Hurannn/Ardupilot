@@ -129,6 +129,9 @@ public:
 #if HAL_MOUNT_XFROBOT_ENABLED
         XFRobot = 14,        /// XFRobot gimbal using a custom serial protocol
 #endif
+#if HAL_MOUNT_AVT_ENABLED
+        AVT = 15,            /// AVT gimbal using MAVLink v2 Gimbal protocol
+#endif
     };
 
     // init - detect and initialise all mounts
