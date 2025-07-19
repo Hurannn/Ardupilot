@@ -3296,11 +3296,11 @@ The voltage sensor can handle up to 6S LiPo batteries.
 
 The default battery parameters are:
 
- - :ref:BATT_MONITOR<BATT_MONITOR> = %s
- - :ref:BATT_VOLT_PIN<BATT_VOLT_PIN__AP_BattMonitor_Analog> = %s
- - :ref:BATT_CURR_PIN<BATT_CURR_PIN__AP_BattMonitor_Analog> = %s (CURR pin)
- - :ref:BATT_VOLT_MULT<BATT_VOLT_MULT__AP_BattMonitor_Analog> = %s
- - :ref:BATT_AMP_PERVLT<BATT_AMP_PERVLT__AP_BattMonitor_Analog> = %s
+ - :ref:`BATT_MONITOR<BATT_MONITOR>` = %s
+ - :ref:`BATT_VOLT_PIN<BATT_VOLT_PIN__AP_BattMonitor_Analog>` = %s
+ - :ref:`BATT_CURR_PIN<BATT_CURR_PIN__AP_BattMonitor_Analog>` = %s (CURR pin)
+ - :ref:`BATT_VOLT_MULT<BATT_VOLT_MULT__AP_BattMonitor_Analog>` = %s
+ - :ref:`BATT_AMP_PERVLT<BATT_AMP_PERVLT__AP_BattMonitor_Analog>` = %s
 ''' % (battmon, self.textdefines.get('HAL_BATT_VOLT_PIN'),
         self.textdefines.get('HAL_BATT_CURR_PIN'), self.textdefines.get('HAL_BATT_VOLT_SCALE'),
         self.textdefines.get('HAL_BATT_CURR_SCALE')))
@@ -3311,7 +3311,7 @@ The default battery parameters are:
             f.write('''
 ## Analog RSSI input
 
-Analog RSSI uses RSSI_PIN %s
+Analog RSSI uses :ref:`RSSI_PIN<RSSI_PIN>` %s
 ''' % rssi)
 
         airspeed = self.textdefines.get('HAL_DEFAULT_AIRSPEED_PIN')
