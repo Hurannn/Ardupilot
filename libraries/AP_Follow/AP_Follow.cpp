@@ -464,6 +464,7 @@ bool AP_Follow::get_target_heading_deg(float &heading_deg)
     if (!_estimate_valid) {
         return false;
     }
+
     // return latest heading estimate
     heading_deg = degrees(_estimate_heading_rad);
     return true;
