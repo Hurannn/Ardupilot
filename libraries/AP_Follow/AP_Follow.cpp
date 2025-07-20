@@ -106,7 +106,7 @@ const AP_Param::GroupInfo AP_Follow::var_info[] = {
     // @Param: _OFS_TYPE
     // @DisplayName: Follow offset type
     // @Description: Follow offset type
-    // @Values: 0:North-East-Down, 1:Relative to lead vehicle heading_deg
+    // @Values: 0:North-East-Down, 1:Relative to lead vehicle heading
     // @User: Standard
     AP_GROUPINFO("_OFS_TYPE", 6, AP_Follow, _offset_type, AP_FOLLOW_OFFSET_TYPE_NED),
 
@@ -310,7 +310,6 @@ void AP_Follow::update_estimates()
     Vector3f offset_m = _offset_m.get();
 
     // calculate estimated position and velocity with offsets applied
-
     if (offset_m.is_zero() || (_offset_type == AP_FOLLOW_OFFSET_TYPE_NED)) {
         // offsets are in NED frame: simple addition
         _ofs_estimate_pos_ned_m = _estimate_pos_ned_m + offset_m.topostype();
@@ -664,7 +663,7 @@ bool AP_Follow::handle_global_position_int_message(const mavlink_message_t &msg)
         // above home alt
         _target_location.set_alt_cm(packet.relative_alt / 10, Location::AltFrame::ABOVE_HOME);
     } else {
-        // absolute altitude
+        // use absolute altitude
         _target_location.set_alt_cm(packet.alt / 10, Location::AltFrame::ABSOLUTE);
     }
 #endif 
@@ -795,9 +794,6 @@ bool AP_Follow::handle_follow_target_message(const mavlink_message_t &msg)
         // otherwise, default heading rate to zero
         _target_heading_rate_degs = 0.0f;
     }
-
-    // apply jitter-corrected timestamp to this update
-    //_last_location_update_ms = _jitter.correct_offboard_timestamp_msec(packet.timestamp, AP_HAL::millis());
 
     // if sysid not yet assigned, adopt sender's sysid and enable automatic sysid tracking
     if (_sysid == 0) {
@@ -968,7 +964,6 @@ bool AP_Follow::have_target(void) const
     }
 
     // check for timeout
-    // if ((_last_location_update_ms == 0) || (((AP_HAL::millis() - _last_location_update_ms) * 0.001f) > _timeout)) {
     if ((_last_location_update_ms == 0) || (((AP_HAL::millis() - _last_location_update_ms) * 0.001f) > _timeout)) {
         return false;
     }
