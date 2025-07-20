@@ -3918,10 +3918,6 @@ function follow:get_last_update_ms() end
 ---@return boolean
 function follow:have_target() end
 
--- get horizontal distance to target (including offset) in meters (for reporting purposes)
----@return number
-function follow:get_distance_to_target_m() end
-
 -- get distance vector to target (in meters) and target's velocity all in NED frame
 ---@return Vector3f_ud|nil -- distance NED
 ---@return Vector3f_ud|nil -- distance NED with offsets

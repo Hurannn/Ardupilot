@@ -804,7 +804,6 @@ singleton AP_Follow rename follow
 singleton AP_Follow method have_target boolean
 singleton AP_Follow method get_target_sysid uint8_t
 singleton AP_Follow method get_last_update_ms uint32_t
-singleton AP_Follow method get_distance_to_target_m float
 singleton AP_Follow method get_target_location_and_velocity boolean Location'Null Vector3f'Null
 singleton AP_Follow method get_target_location_and_velocity_ofs boolean Location'Null Vector3f'Null
 singleton AP_Follow method get_target_heading_deg boolean float'Null
