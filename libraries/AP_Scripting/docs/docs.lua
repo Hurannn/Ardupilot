@@ -413,7 +413,6 @@ function CAN:get_device(buffer_len) end
 ---@param buffer_len uint32_t_ud|integer|number -- buffer length 1 to 25
 ---@return ScriptingCANBuffer_ud|nil
 function CAN:get_device2(buffer_len) end
-
 -- get latest FlexDebug message from a CAN node
 ---@param bus number -- CAN bus number, 0 for first bus, 1 for 2nd
 ---@param node number -- CAN node
