@@ -107,8 +107,11 @@ Enable Lua scripting by setting `SCR_ENABLE = 1` on the FOLLOW plane.
 Install the lua script in the APM/scripts directory on the flight
 controller's microSD card on the FOLLOW plane. 
 
-Install the speedpid.lua, mavlink_command_int.lua, mavlink_attitude.lua and mavlink_msgs.lua files
+Install the speedpid.lua, mavlink_command_int.lua, mavlink_attitude.lua files
 in the `APM/scripts/modules` directory on the SD card on the FOLLOW plane.
+
+Install the mavlink_msgs.lua files
+in the `APM/scripts/modules/mavlink` directory on the SD card on the FOLLOW plane.
 
 No scripts are required on the target plane.
 
