@@ -21,7 +21,7 @@
 
 local MAVLink_command_int = {}
 
-MAVLink_command_int.SCRIPT_VERSION = "4.7.0-005"
+MAVLink_command_int.SCRIPT_VERSION = "4.7.0-006"
 MAVLink_command_int.SCRIPT_NAME = "MAVLink Command Int"
 MAVLink_command_int.SCRIPT_NAME_SHORT = "MAVCMDINT"
 
@@ -104,6 +104,8 @@ function MAVLink_command_int.send(channel, message)
         if not mavlink:send_chan(channel, command_id, encoded_message) then
             gcs:send_text(MAVLink_command_int.MAV_SEVERITY.WARNING, MAVLink_command_int.SCRIPT_NAME_SHORT .. " MAVLink buffer is full")
             return false
+        else
+            gcs:send_text(MAVLink_command_int.MAV_SEVERITY.WARNING, MAVLink_command_int.SCRIPT_NAME_SHORT .. " MAVLink SENT")
         end
     end
     return true
@@ -151,7 +153,7 @@ function MAVLink_command_int.request_message_interval(channel, target)
     return true
 end
 
-gcs:send_text(MAV_SEVERITY.INFO, string.format("%s %s module loaded",
+gcs:send_text(MAVLink_command_int.MAV_SEVERITY.INFO, string.format("%s %s module loaded",
                     MAVLink_command_int.SCRIPT_NAME, MAVLink_command_int.SCRIPT_VERSION) )
 
 return MAVLink_command_int
