@@ -149,8 +149,9 @@ void AP_GSOF::parse_pos_time(uint32_t a)
     pos_time.num_sats = msg.data[a + 6];
     pos_time.pos_flags1 = msg.data[a + 7];
     pos_time.pos_flags2 = msg.data[a + 8];
-
+#if HAL_LOGGING_ENABLED
     log_pos_time();
+#endif // HAL_LOGGING_ENABLED
 }
 
 void AP_GSOF::parse_pos(uint32_t a)
@@ -219,7 +220,9 @@ void AP_GSOF::parse_ins_full_nav(uint32_t a)
     ins_full_nav.acc_y = be32tofloat_ptr(msg.data, a + 96);
     ins_full_nav.acc_z = be32tofloat_ptr(msg.data, a + 100);
 
+#if HAL_LOGGING_ENABLED
     log_ins_full_nav();
+#endif // HAL_LOGGING_ENABLED
 }
 
 void AP_GSOF::parse_ins_rms(uint32_t a)
@@ -239,7 +242,9 @@ void AP_GSOF::parse_ins_rms(uint32_t a)
     ins_rms.pitch_rms_deg = be32tofloat_ptr(msg.data, a + 36);
     ins_rms.yaw_rms_deg = be32tofloat_ptr(msg.data, a + 40);
 
+#if HAL_LOGGING_ENABLED
     log_ins_rms();
+#endif // HAL_LOGGING_ENABLED
 }
 
 void AP_GSOF::parse_llh_msl(uint32_t a)
@@ -252,7 +257,9 @@ void AP_GSOF::parse_llh_msl(uint32_t a)
     memcpy(llh_msl.model, msg.data + a + 24, sizeof(llh_msl.model));
     llh_msl.model[sizeof(llh_msl.model) - 1] = '\0';  // ensure null-termination
 
+#if HAL_LOGGING_ENABLED
     log_llh_msl();
+#endif // HAL_LOGGING_ENABLED
 }
 
 #if HAL_LOGGING_ENABLED
