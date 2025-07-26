@@ -46,7 +46,7 @@
 //      param set GPS2_TYPE 21
 //      param set GPS_PRIMARY 0
 
-#define ALLOW_DOUBLE_MATH_FUNCTIONS
+#define AP_MATH_ALLOW_DOUBLE_FUNCTIONS 1
 
 #include "AP_ExternalAHRS_config.h"
 
