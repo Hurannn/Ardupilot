@@ -424,15 +424,15 @@ bool ModeAuto::wp_start(const Location& dest_loc)
 {
     // init wpnav and set origin if transitioning from takeoff
     if (!wp_nav->is_active()) {
-        Vector3f stopping_point;
+        Vector3f stopping_point_neu_cm;
         if (_mode == SubMode::TAKEOFF) {
-            Vector3p takeoff_complete_pos;
-            if (auto_takeoff.get_completion_pos(takeoff_complete_pos)) {
-                stopping_point = takeoff_complete_pos.tofloat();
+            Vector3p takeoff_complete_pos_neu_cm;
+            if (auto_takeoff.get_completion_pos(takeoff_complete_pos_neu_cm)) {
+                stopping_point_neu_cm = takeoff_complete_pos_neu_cm.tofloat();
             }
         }
         float des_speed_xy_cm = is_positive(desired_speed_override.xy) ? (desired_speed_override.xy * 100) : 0;
-        wp_nav->wp_and_spline_init_cm(des_speed_xy_cm, stopping_point);
+        wp_nav->wp_and_spline_init_cm(des_speed_xy_cm, stopping_point_neu_cm);
 
         // override speeds up and down if necessary
         if (is_positive(desired_speed_override.up)) {

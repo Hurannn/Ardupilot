@@ -30,9 +30,9 @@ private:
     float no_nav_alt_cm;
 
     // auto takeoff variables
-    float complete_alt_cm;  // completion altitude expressed in cm above ekf origin or above terrain (depending upon auto_takeoff_terrain_alt)
-    bool terrain_alt;       // true if altitudes are above terrain
-    Vector3p complete_pos;  // target takeoff position as offset from ekf origin in cm
+    float complete_alt_cm;          // completion altitude expressed in cm above ekf origin or above terrain (depending upon auto_takeoff_terrain_alt)
+    bool is_terrain_alt;            // true if altitudes are above terrain
+    Vector3p complete_pos_neu_cm;   // target takeoff position as offset from ekf origin in cm
 };
 
 #if AC_PAYLOAD_PLACE_ENABLED
@@ -286,14 +286,14 @@ protected:
     public:
         void start(float alt_cm);
         void stop();
-        void do_pilot_takeoff(float& pilot_climb_rate);
-        bool triggered(float target_climb_rate) const;
+        void do_pilot_takeoff(float& pilot_climb_rate_cms);
+        bool triggered(float target_climb_rate_cms) const;
 
         bool running() const { return _running; }
     private:
         bool _running;
-        float take_off_start_alt;
-        float take_off_complete_alt;
+        float take_off_start_alt_cm;
+        float take_off_complete_alt_cm;
     };
 
     static _TakeOff takeoff;

@@ -701,7 +701,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Description: Altitude in meters above which navigation will begin during auto takeoff
     // @Range: 0 5
     // @User: Standard
-    AP_GROUPINFO("WP_NAVALT_MIN", 1, ParametersG2, wp_navalt_min, 0),
+    AP_GROUPINFO("WP_NAVALT_MIN", 1, ParametersG2, wp_navalt_min_m, 0),
 
 #if HAL_BUTTON_ENABLED
     // @Group: BTN_
