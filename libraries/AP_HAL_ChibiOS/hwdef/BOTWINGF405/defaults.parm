@@ -1,0 +1,8 @@
+#osd params
+OSD_TYPE2 5
+
+#ntf LED & buzzer params
+NTF_LED_TYPES,257
+
+SERVO5_FUNCTION,120
+
