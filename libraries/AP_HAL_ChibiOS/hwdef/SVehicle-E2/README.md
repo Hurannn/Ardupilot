@@ -56,16 +56,26 @@ RC input is configured on the RCIN pin, at one end of the servo rail, marked PPM
 
 The E2-Plus flight controller supports up to 14 PWM outputs.
 
-The 14 PWM outputs are in 6 groups:
+The 14 PWM outputs are:
 
+M1 - M8 are connected to the IOMCU
+A1 - A6 are connected to the FMU
+
+M1 - M8 support DShot but not BDShot and are all in one group (IS THIS CORRECT?)
+A1 - A4 are in one group (TIM5). 
+A5, A6 are in a 2nd group (TIM4)
+
+Channels within the same group need to use the same output rate. If any channel in a group uses DShot then all channels in the group need to use DShot. Outputs A1-A6 support BDShot.
+
+-- TO BE DELETED
 - PWM 1-4 in group1 (TIM5)
 - PWM 5 and 6 in group2 (TIM4)
 - PWM 7 and 8 in group3 (TIM1 - no DMA, PWM only)
 - PWM 9, 10 and 11 in group4 (TIM8)
 - PWM 12 in group5 (TIM15)
 - PWM 13 and 14 in group6 (TIM12)
+-- TO BE DELETED
 
-Channels within the same group need to use the same output rate. If any channel in a group uses DShot then all channels in the group need to use DShot. Outputs 1-6 support BDShot.
 
 ## Battery Monitoring
 
