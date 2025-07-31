@@ -6,6 +6,42 @@
 
 extern const AP_HAL::HAL& hal;
 
+const AP_Param::GroupInfo AP_EZKontrol::var_info[] = {
+    // @Param: ESC1_ADDR
+    // @DisplayName: ESC1 CAN address
+    // @Description: CAN address of ESC1
+    // @User: Advanced
+    AP_GROUPINFO("ESC1_ADDR", 1, AP_EZKontrol, esc1_addr, 0xEF),
+
+    // @Param: ESC2_ADDR
+    // @DisplayName: ESC2 CAN address
+    // @Description: CAN address of ESC2
+    // @User: Advanced
+    AP_GROUPINFO("ESC2_ADDR", 2, AP_EZKontrol, esc2_addr, 0xF0),
+
+    // @Param: VCU_ADDR
+    // @DisplayName: VCU CAN address
+    // @Description: CAN address of Vehicle Control Unit
+    // @User: Advanced
+    AP_GROUPINFO("VCU_ADDR", 3, AP_EZKontrol, vcu_addr, 0xD0),
+
+    // @Param: TARGET_PHASE_CUR
+    // @DisplayName: Target phase current
+    // @Description: Target phase current in 0.1A units
+    // @Units: 0.1A
+    // @User: Advanced
+    AP_GROUPINFO("TARGET_PHASE_CUR", 4, AP_EZKontrol, target_phase_cur, 0),
+
+    // @Param: CMD_MODE
+    // @DisplayName: Command mode
+    // @Description: 0=Torque, 1=Speed
+    // @Values: 0:Torque,1:Speed
+    // @User: Advanced
+    AP_GROUPINFO("CMD_MODE", 5, AP_EZKontrol, cmd_mode, 0),
+
+    AP_GROUPEND
+};
+
 // CAN IDs
 static const uint32_t ID_VCU_TX = 0x0C01EFD0;
 static const uint32_t ID_MCU_TX1 = 0x1801D0EF;
@@ -107,6 +143,7 @@ void AP_EZKontrol_Driver::handle_frame(AP_HAL::CANFrame &frame)
 
 AP_EZKontrol::AP_EZKontrol()
 {
+	AP_Param::setup_object_defaults(this, var_info);
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     if (_singleton != nullptr) {
         AP_HAL::panic("AP_EZKontrol must be singleton");
