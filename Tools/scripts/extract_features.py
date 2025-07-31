@@ -204,6 +204,7 @@ class ExtractFeatures(object):
             ('AP_FETTEC_ONEWIRE_ENABLED', r'AP_FETtecOneWire::init\b',),
             ('AP_SBUSOUTPUT_ENABLED', 'AP_SBusOut::sbus_format_frame',),
             ('AP_KDECAN_ENABLED', r'AP_KDECAN::update\b',),
+            ('AP_EZKONTROL_ENABLED', r'AP_EZKontrol::update\b',),
 
             ('AP_RPM_ENABLED', 'AP_RPM::AP_RPM',),
             ('AP_RPM_{type}_ENABLED', r'AP_RPM_(?P<type>.*)::update',),
