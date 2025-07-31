@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef AP_EZKONTROL_H
+#define AP_EZKONTROL_H
+
 #include "AP_EZKontrol_config.h"
 
 #if AP_EZKONTROL_ENABLED
@@ -43,12 +46,23 @@ public:
     AP_EZKontrol();
     void init();
     void update();
+	
+	static const AP_Param::GroupInfo var_info[];
 
     static AP_EZKontrol *get_singleton() { return _singleton; }
 
 private:
     static AP_EZKontrol *_singleton;
     AP_EZKontrol_Driver *_driver = nullptr;
+	
+	 // addresses of ESC and VCU
+    AP_Int8 esc1_addr;
+    AP_Int8 esc2_addr;
+    AP_Int8 vcu_addr;
+    // target phase current (0.1 A units)
+    AP_Int16 target_phase_cur;
+    // command mode (0=Torque, 1=Speed)
+    AP_Int8 cmd_mode;
 };
 
 namespace AP {
