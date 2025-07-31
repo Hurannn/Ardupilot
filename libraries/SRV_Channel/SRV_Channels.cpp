@@ -516,6 +516,11 @@ void SRV_Channels::push()
         AP::kdecan()->update();
     }
 #endif
+#if AP_EZKONTROL_ENABLED
+    if (AP::ezkontrol() != nullptr) {
+        AP::ezkontrol()->update();
+    }
+#endif
 
 #if HAL_ENABLE_DRONECAN_DRIVERS
     // push outputs to CAN

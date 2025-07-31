@@ -69,6 +69,7 @@
 #include <AP_CheckFirmware/AP_CheckFirmware.h>
 #include <Filter/LowPassFilter.h>
 #include <AP_KDECAN/AP_KDECAN.h>
+#include <AP_EZKontrol/AP_EZKontrol.h>
 #include <Filter/AP_Filter.h>
 #include <AP_Stats/AP_Stats.h>              // statistics library
 #include <AP_DDS/AP_DDS_config.h>
@@ -475,6 +476,9 @@ protected:
 
 #if AP_KDECAN_ENABLED
     AP_KDECAN kdecan;
+#endif
+#if AP_EZKONTROL_ENABLED
+    AP_EZKontrol ezkontrol;
 #endif
 
 #if AP_FENCE_ENABLED
