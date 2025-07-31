@@ -1080,6 +1080,7 @@ class sitl_periph_battery_tag(sitl_periph):
 
             AP_SIM_PARAM_ENABLED = 0,
             AP_KDECAN_ENABLED = 0,
+            AP_EZKONTROL_ENABLED = 0,
             AP_TEMPERATURE_SENSOR_ENABLED = 0,
             AP_PERIPH_BATTERY_TAG_ENABLED = 1,
             AP_RTC_ENABLED = 1,

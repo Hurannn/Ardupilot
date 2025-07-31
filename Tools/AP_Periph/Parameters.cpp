@@ -581,6 +581,11 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     // @Path: ../libraries/AP_KDECAN/AP_KDECAN.cpp
     GOBJECT(kdecan, "KDE_",   AP_KDECAN),
 #endif
+#if AP_EZKONTROL_ENABLED
+    // @Group: EZK_
+    // @Path: ../libraries/AP_EZKontrol/AP_EZKontrol.cpp
+    GOBJECT(ezkontrol, "EZK_",   AP_EZKontrol),
+#endif
 
 #if AP_PERIPH_ESC_APD_ENABLED
     GARRAY(pole_count, 0, "ESC_NUM_POLES", 22),
