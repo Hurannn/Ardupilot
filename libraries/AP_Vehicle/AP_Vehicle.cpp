@@ -11,6 +11,7 @@
 #include <AP_Frsky_Telem/AP_Frsky_Parameters.h>
 #include <AP_Logger/AP_Logger.h>
 #include <AP_Mission/AP_Mission.h>
+#include <AP_EZKontrol/AP_EZKontrol.h>
 #include <AP_OSD/AP_OSD.h>
 #include <SRV_Channel/SRV_Channel.h>
 #include <AP_Motors/AP_Motors.h>
@@ -143,6 +144,11 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     // @Group: KDE_
     // @Path: ../AP_KDECAN/AP_KDECAN.cpp
     AP_SUBGROUPINFO(kdecan, "KDE_",  19, AP_Vehicle, AP_KDECAN),
+#endif
+#if AP_EZKONTROL_ENABLED
+    // @Group: EZK_
+    // @Path: ../AP_EZKontrol/AP_EZKontrol.cpp
+    AP_SUBGROUPINFO(ezkontrol, "EZK_", 20, AP_Vehicle, AP_EZKontrol),
 #endif
 
 #if APM_BUILD_COPTER_OR_HELI || APM_BUILD_TYPE(APM_BUILD_ArduPlane) || APM_BUILD_TYPE(APM_BUILD_Rover)
@@ -498,6 +504,9 @@ void AP_Vehicle::setup()
 
 #if AP_KDECAN_ENABLED
     kdecan.init();
+#endif
+#if AP_EZKONTROL_ENABLED
+    ezkontrol.init();
 #endif
 
 #if AP_AIS_ENABLED

@@ -219,6 +219,9 @@ void AP_Periph_FW::init()
 #if AP_KDECAN_ENABLED
     kdecan.init();
 #endif
+#if AP_EZKONTROL_ENABLED
+    ezkontrol.init();
+#endif
 
 #if AP_PERIPH_AIRSPEED_ENABLED
 #if (CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS) && (HAL_USE_I2C == TRUE)
