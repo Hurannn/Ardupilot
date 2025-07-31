@@ -28,6 +28,7 @@
 #include <AP_KDECAN/AP_KDECAN.h>
 #include <AP_SerialManager/AP_SerialManager.h>
 #include <AP_PiccoloCAN/AP_PiccoloCAN.h>
+#include <AP_EZKontrol/AP_EZKontrol.h>
 #include <AP_EFI/AP_EFI_NWPMU.h>
 #include <GCS_MAVLink/GCS.h>
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
@@ -225,6 +226,14 @@ void AP_CANManager::init()
             AP_Param::load_object_from_eeprom((AP_PiccoloCAN*)_drivers[drv_num], AP_PiccoloCAN::var_info);
             break;
 #endif
+        case AP_CAN::Protocol::EZKontrol:
+            _drivers[drv_num] = _drv_param[drv_num]._ezkontrol = NEW_NOTHROW AP_EZKontrol_Driver();
+            if (_drivers[drv_num] == nullptr) {
+                AP_BoardConfig::allocation_error("EZKontrol %d", drv_num + 1);
+                continue;
+            }
+            AP_Param::load_object_from_eeprom((AP_EZKontrol*)_drivers[drv_num], AP_EZKontrol::var_info);
+            break;
         default:
             continue;
         }

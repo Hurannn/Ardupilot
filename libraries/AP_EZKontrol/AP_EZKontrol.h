@@ -22,23 +22,27 @@ public:
 
     void update();
 
-    void set_target_current(int16_t c) { _target_current = c; }
-    void set_target_speed(int16_t s) { _target_speed = s; }
+    void set_addresses(uint8_t esc1, uint8_t esc2, uint8_t vcu);
+
+    void set_target(uint8_t idx, int16_t current, int16_t speed);
+
     void set_control_mode(uint8_t m) { _control_mode = m; }
 
 private:
     void handle_frame(AP_HAL::CANFrame &frame) override;
 
-    void send_handshake();
-    void send_command();
+    void send_handshake(uint8_t idx);
+    void send_command(uint8_t idx);
 
-    bool _handshake_done = false;
-    uint8_t _life = 0;
-    uint32_t _last_tx_ms = 0;
+    uint8_t _esc_addr[2]{};
+    uint8_t _vcu_addr{0};
+    bool _handshake_done[2]{};
+    uint8_t _life[2]{};
+    uint32_t _last_tx_ms{0};
 
-    int16_t _target_current = 0;
-    int16_t _target_speed = 0;
-    uint8_t _control_mode = 0;
+    int16_t _target_current[2]{};
+    int16_t _target_speed[2]{};
+    uint8_t _control_mode{0};
 };
 
 class AP_EZKontrol {
