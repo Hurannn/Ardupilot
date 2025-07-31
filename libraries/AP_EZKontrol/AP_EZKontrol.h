@@ -70,3 +70,5 @@ namespace AP {
 };
 
 #endif // AP_EZKONTROL_ENABLED
+
+#endif // AP_EZKONTROL_H
