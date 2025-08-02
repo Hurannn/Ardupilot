@@ -132,7 +132,7 @@ void DroneCAN_sniffer::init(void)
         debug_dronecan("Can not initialised\n");
         return;
     }
-    _uavcan_iface_mgr = NEW_NOTHROW CanardInterface{driver_index};
+    _uavcan_iface_mgr = NEW_NOTHROW CanardInterface{nullptr, driver_index};
 
     if (_uavcan_iface_mgr == nullptr) {
         return;
