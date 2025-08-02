@@ -15,7 +15,9 @@ public:
     CanardInterface(const CanardInterface&) = delete;
     CanardInterface& operator=(const CanardInterface&) = delete;
 
-    CanardInterface(uint8_t driver_index);
+    CanardInterface(AP_DroneCAN *parent, uint8_t driver_index);
+
+    void set_parent(AP_DroneCAN *parent) { _parent = parent; }
 
     void init(void* mem_arena, size_t mem_arena_size, uint8_t node_id);
 
@@ -81,5 +83,7 @@ private:
 
     // auxillary 11 bit CANSensor
     CANSensor *aux_11bit_driver;
+
+    AP_DroneCAN *_parent;
 };
 #endif // HAL_ENABLE_DRONECAN_DRIVERS

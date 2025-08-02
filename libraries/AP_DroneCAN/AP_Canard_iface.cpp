@@ -23,7 +23,7 @@ DEFINE_TRANSFER_OBJECT_SEMAPHORES();
 
 #if AP_TEST_DRONECAN_DRIVERS
 CanardInterface* CanardInterface::canard_ifaces[] = {nullptr, nullptr, nullptr};
-CanardInterface CanardInterface::test_iface{2};
+CanardInterface CanardInterface::test_iface{nullptr, 2};
 uint8_t test_node_mem_area[1024];
 HAL_Semaphore test_iface_sem;
 #endif
@@ -49,8 +49,9 @@ void canard_allocate_sem_give(CanardPoolAllocator *allocator) {
     ((HAL_Semaphore*)allocator->semaphore)->give();
 }
 
-CanardInterface::CanardInterface(uint8_t iface_index) :
-Interface(iface_index) {
+CanardInterface::CanardInterface(AP_DroneCAN *parent, uint8_t iface_index) :
+Interface(iface_index),
+_parent(parent) {
 #if AP_TEST_DRONECAN_DRIVERS
     if (iface_index < 3) {
         canard_ifaces[iface_index] = this;
@@ -346,6 +347,9 @@ void CanardInterface::processRx() {
             AP_HAL::CANIface::CanIOFlags flags;
             if (ifaces[i]->receive(rxmsg, timestamp, flags) <= 0) {
                 break;
+            }
+            if (_parent != nullptr) {
+                _parent->process_raw_frame(rxmsg);
             }
 
             if (!rxmsg.isExtended()) {

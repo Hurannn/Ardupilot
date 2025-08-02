@@ -108,6 +108,10 @@ public:
     FUNCTOR_TYPEDEF(ParamSaveCb, void, AP_DroneCAN*,  const uint8_t, bool);
 
     void send_node_status();
+    void process_raw_frame(const AP_HAL::CANFrame &frame);
+
+    enum class HBState : uint8_t { STANDBY, HANDSHAKE_DONE };
+    void update_handshake();
 
     ///// SRV output /////
     void SRV_push_servos(void);
@@ -237,6 +241,16 @@ private:
     AP_Int16 _notify_state_hz;
     AP_Int16 _pool_size;
     AP_Int32 _esc_rv;
+
+    AP_Int8 _vcu_id;
+    AP_Int8 _mcu_id;
+    AP_Int16 _ez_hz;
+    AP_Int8 _ez_esc;
+    AP_Int16 _ez_tpc;
+
+    uint8_t _hb_seq{0};
+    HBState _hb_state{HBState::STANDBY};
+    uint32_t _hb_last_rx_ms{0};
 
     uint32_t *mem_pool;
 

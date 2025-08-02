@@ -171,6 +171,42 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
     AP_GROUPINFO("RLY_RT", 23, AP_DroneCAN, _relay.rate_hz, 0),
 #endif
 
+    // @Param: VCU_ID
+    // @DisplayName: Heartbeat CAN ID first byte
+    // @Description: First byte of heartbeat CAN ID
+    // @Range: 0 255
+    // @User: Advanced
+    AP_GROUPINFO("VCU_ID", 24, AP_DroneCAN, _vcu_id, 0),
+
+    // @Param: MCU_ID
+    // @DisplayName: Heartbeat CAN ID second byte
+    // @Description: Second byte of heartbeat CAN ID
+    // @Range: 0 255
+    // @User: Advanced
+    AP_GROUPINFO("MCU_ID", 25, AP_DroneCAN, _mcu_id, 0),
+
+    // @Param: EZ_HZ
+    // @DisplayName: Heartbeat rate
+    // @Description: Frequency to send heartbeat on CAN
+    // @Range: 0 50
+    // @Units: Hz
+    // @User: Advanced
+    AP_GROUPINFO("EZ_HZ", 26, AP_DroneCAN, _ez_hz, 1),
+
+    // @Param: EZ_ESC
+    // @DisplayName: ESC channel for heartbeat payload
+    // @Description: ESC index whose output value is sent in the heartbeat payload
+    // @Range: 1 32
+    // @User: Advanced
+    AP_GROUPINFO("EZ_ESC", 27, AP_DroneCAN, _ez_esc, 1),
+
+    // @Param: EZ_TPC
+    // @DisplayName: Heartbeat topic ID
+    // @Description: Two byte value placed in the first two bytes of the heartbeat payload
+    // @Range: 0 65535
+    // @User: Advanced
+    AP_GROUPINFO("EZ_TPC", 28, AP_DroneCAN, _ez_tpc, 0),
+
 #if AP_DRONECAN_SERIAL_ENABLED
     /*
       due to the parameter tree depth limitation we can't use a sub-table for the serial parameters
@@ -271,7 +307,7 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
 #endif // AP_DRONECAN_SERIAL_ENABLED
 
     // RLY_RT is index 23 but has to be above SER_EN so its not hidden
-
+    
     AP_GROUPEND
 };
 
@@ -281,7 +317,7 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
 
 AP_DroneCAN::AP_DroneCAN(const int driver_index) :
 _driver_index(driver_index),
-canard_iface(driver_index),
+canard_iface(this, driver_index),
 _dna_server(*this, canard_iface, driver_index)
 {
     AP_Param::setup_object_defaults(this, var_info);
@@ -526,6 +562,7 @@ void AP_DroneCAN::loop(void)
         hal.scheduler->delay_microseconds(100);
 
         canard_iface.process(1);
+        update_handshake();
 
         safety_state_send();
         notify_state_send();
@@ -659,12 +696,39 @@ void AP_DroneCAN::handle_hobbywing_StatusMsg2(const CanardRxTransfer& transfer, 
 void AP_DroneCAN::send_node_status(void)
 {
     const uint32_t now = AP_HAL::millis();
-    if (now - _node_status_last_send_ms < 1000) {
+    update_handshake();
+    if (_ez_hz == 0 || (now - _node_status_last_send_ms) < uint32_t(1000 / _ez_hz)) {
         return;
     }
     _node_status_last_send_ms = now;
     node_status_msg.uptime_sec = now / 1000;
     node_status.broadcast(node_status_msg);
+
+    // send simple heartbeat frame on all interfaces if handshake complete
+    if (_hb_state == HBState::HANDSHAKE_DONE) {
+        AP_HAL::CANFrame hb_frame{};
+        uint32_t hb_id = 0x0C010000u |
+                         ((uint32_t(_mcu_id.get()) & 0xFF) << 8) |
+                         (uint32_t(_vcu_id.get()) & 0xFF);
+        hb_frame.id = hb_id | AP_HAL::CANFrame::FlagEFF;
+
+        uint16_t topic = _ez_tpc.get();
+        uint8_t esc_index = constrain_int16(_ez_esc.get(), 1, DRONECAN_SRV_NUMBER) - 1;
+        uint16_t esc_value = scale_esc_output(esc_index);
+
+        hb_frame.data[0] = topic & 0xFF;
+        hb_frame.data[1] = topic >> 8;
+        hb_frame.data[2] = esc_value & 0xFF;
+        hb_frame.data[3] = esc_value >> 8;
+        hb_frame.data[4] = hal.util->get_soft_armed() ? 0x03 : 0x02;
+        hb_frame.data[5] = 0;
+        hb_frame.data[6] = 0;
+        hb_frame.data[7] = _hb_seq++;
+
+        hb_frame.dlc = AP_HAL::CANFrame::dataLengthToDlc(8);
+
+        canard_iface.write_aux_frame(hb_frame, 1000);
+    }
 
     if (option_is_set(Options::ENABLE_STATS)) {
         // also send protocol and can stats
@@ -1969,6 +2033,41 @@ bool AP_DroneCAN::write_aux_frame(AP_HAL::CANFrame &out_frame, const uint64_t ti
         return false;
     }
     return canard_iface.write_aux_frame(out_frame, timeout_us);
+}
+
+void AP_DroneCAN::process_raw_frame(const AP_HAL::CANFrame &frame)
+{
+    if (!frame.isExtended()) {
+        return;
+    }
+    const uint32_t id = frame.id & AP_HAL::CANFrame::MaskExtID;
+    const uint32_t handshake_id = 0x18010000u |
+                                  ((uint32_t(_vcu_id.get()) & 0xFF) << 8) |
+                                  (uint32_t(_mcu_id.get()) & 0xFF);
+    if (id != handshake_id) {
+        return;
+    }
+    if (AP_HAL::CANFrame::dlcToDataLength(frame.dlc) != 8) {
+        return;
+    }
+    for (uint8_t i=0; i<8; i++) {
+        if (frame.data[i] != 0x55) {
+            return;
+        }
+    }
+    _hb_state = HBState::HANDSHAKE_DONE;
+    _hb_last_rx_ms = AP_HAL::millis();
+}
+
+void AP_DroneCAN::update_handshake()
+{
+    if (_hb_state != HBState::HANDSHAKE_DONE) {
+        return;
+    }
+    uint32_t period_ms = (_ez_hz <= 0) ? 1000 : uint32_t(1000 / _ez_hz);
+    if (AP_HAL::millis() - _hb_last_rx_ms >= period_ms * 10U) {
+        _hb_state = HBState::STANDBY;
+    }
 }
 
 #endif // HAL_NUM_CAN_IFACES
