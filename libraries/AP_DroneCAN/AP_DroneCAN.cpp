@@ -2035,6 +2035,52 @@ bool AP_DroneCAN::write_aux_frame(AP_HAL::CANFrame &out_frame, const uint64_t ti
     return canard_iface.write_aux_frame(out_frame, timeout_us);
 }
 
+void AP_DroneCAN::send_ez_cmd(void)
+{
+	const uint32_t now = AP_HAL::millis();
+	//update_handshake();                               // AP_EZKONTROL_TEST == 3.7
+	if (_hb_state[0] != HBState::HANDSHAKE_DONE) {
+        return;
+    }
+	if (_ez_hz == 0 || (now - _ez_status_last_send_ms) < uint32_t(1000 / _ez_hz)) {
+        return;
+    }
+	_ez_status_last_send_ms = now;
+	    // send simple heartbeat frame on all interfaces
+    {
+        AP_HAL::CANFrame hb_frame{};
+        uint32_t hb_id = 0x0C010000u |
+                         ((uint32_t(_mcu_id[0].get()) & 0xFF) << 8) |
+                         (uint32_t(_vcu_id.get()) & 0xFF);
+						 
+        hb_frame.id = hb_id | AP_HAL::CANFrame::FlagEFF;
+		
+		// uint16_t esc_value = scale_esc_output(0); // AP_EZKONTROL_TEST == 3.5
+		// hb_frame.data[0] = esc_value & 0xFF;
+        // hb_frame.data[1] = esc_value >> 8;
+		// memset(&hb_frame.data[2], 0, 6);
+        // hb_frame.dlc = AP_HAL::CANFrame::dataLengthToDlc(8);
+		
+		uint16_t Target_Phase_Current = _ez_tpc.get();                        // AP_EZKONTROL_TEST == 3.6
+        //uint8_t esc_index = constrain_int16(_ez_esc.get(), 1, DRONECAN_SRV_NUMBER) - 1; // i know esc0=left motor
+        uint16_t esc_value = scale_esc_output(0);  // i know esc0=left motor
+        hb_frame.data[0] = Target_Phase_Current & 0xFF;
+        hb_frame.data[1] = Target_Phase_Current >> 8;
+        hb_frame.data[2] = esc_value & 0xFF;
+        hb_frame.data[3] = esc_value >> 8;
+        hb_frame.data[4] = hal.util->get_soft_armed() ? 0x03 : 0x02;
+        hb_frame.data[5] = 0;
+        hb_frame.data[6] = 0;
+        hb_frame.data[7] = _hb_seq++; // Life signal
+		hb_frame.dlc = AP_HAL::CANFrame::dataLengthToDlc(8);
+	
+        // hb_frame.dlc = AP_HAL::CANFrame::dataLengthToDlc(8); // AP_EZKONTROL_TEST == 3
+        // memset(hb_frame.data, 0xAA, 8);
+
+        canard_iface.write_aux_frame(hb_frame, 1000);
+    }
+}
+
 void AP_DroneCAN::process_raw_frame(const AP_HAL::CANFrame &frame)
 {
     if (!frame.isExtended()) {
@@ -2043,31 +2089,48 @@ void AP_DroneCAN::process_raw_frame(const AP_HAL::CANFrame &frame)
     const uint32_t id = frame.id & AP_HAL::CANFrame::MaskExtID;
     const uint32_t handshake_id = 0x18010000u |
                                   ((uint32_t(_vcu_id.get()) & 0xFF) << 8) |
-                                  (uint32_t(_mcu_id.get()) & 0xFF);
+                                  (uint32_t(_mcu_id[0].get()) & 0xFF);
     if (id != handshake_id) {
         return;
     }
     if (AP_HAL::CANFrame::dlcToDataLength(frame.dlc) != 8) {
         return;
     }
-    for (uint8_t i=0; i<8; i++) {
-        if (frame.data[i] != 0x55) {
+
+	if (_hb_state[0] == HBState::STANDBY) {
+		for (uint8_t i=0; i<8; i++) {
+			if (frame.data[i] != 0x55) {
             return;
-        }
-    }
-    _hb_state = HBState::HANDSHAKE_DONE;
-    _hb_last_rx_ms = AP_HAL::millis();
+			}
+		}
+		send_handshake(0);  // send 8 bytes 0xAA to mcu index 0 (_mcu_id[0])
+		
+		_hb_state[0] = HBState::HANDSHAKE_DONE;
+	}
+    _hb_last_rx_ms[0] = AP_HAL::millis();
 }
 
-void AP_DroneCAN::update_handshake()
+void AP_DroneCAN::update_handshake()                        // 3.7
 {
-    if (_hb_state != HBState::HANDSHAKE_DONE) {
+    if (_hb_state[0] != HBState::HANDSHAKE_DONE) {   // if _hb_state==STANDBY
         return;
     }
-    uint32_t period_ms = (_ez_hz <= 0) ? 1000 : uint32_t(1000 / _ez_hz);
-    if (AP_HAL::millis() - _hb_last_rx_ms >= period_ms * 10U) {
-        _hb_state = HBState::STANDBY;
+    uint32_t period_ms = (_ez_hz <= 0) ? 1000 : uint32_t(1000 / _ez_hz); // if _hb_state==HANDSHAKE_DONE
+    if (AP_HAL::millis() - _hb_last_rx_ms[0] >= period_ms * 10U) {
+        _hb_state[0] = HBState::STANDBY;
     }
+}
+
+void AP_DroneCAN::send_handshake(const uint8_t index)
+{
+	AP_HAL::CANFrame hb_frame{};
+	uint32_t hb_id = 0x0C010000u |
+					 ((uint32_t(_mcu_id[index].get()) & 0xFF) << 8) |
+					 (uint32_t(_vcu_id.get()) & 0xFF);
+	hb_frame.id = hb_id | AP_HAL::CANFrame::FlagEFF;
+	hb_frame.dlc = AP_HAL::CANFrame::dataLengthToDlc(8);
+	memset(hb_frame.data, 0xAA, 8);
+	canard_iface.write_aux_frame(hb_frame, 1000);
 }
 
 #endif // HAL_NUM_CAN_IFACES
