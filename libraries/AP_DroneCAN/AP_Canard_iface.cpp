@@ -6,6 +6,7 @@
 #include <canard/transfer_object.h>
 #include <AP_Math/AP_Math.h>
 #include <dronecan_msgs.h>
+#include "AP_DroneCAN.h"
 extern const AP_HAL::HAL& hal;
 #define LOG_TAG "DroneCANIface"
 #include <canard.h>
