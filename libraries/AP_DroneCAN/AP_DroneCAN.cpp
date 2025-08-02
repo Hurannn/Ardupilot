@@ -570,6 +570,7 @@ void AP_DroneCAN::loop(void)
         send_parameter_request();
         send_parameter_save_request();
         send_node_status();
+        update_handshake();
         _dna_server.verify_nodes();
 
 #if AP_DRONECAN_SEND_GPS && AP_GPS_DRONECAN_ENABLED
@@ -696,39 +697,12 @@ void AP_DroneCAN::handle_hobbywing_StatusMsg2(const CanardRxTransfer& transfer, 
 void AP_DroneCAN::send_node_status(void)
 {
     const uint32_t now = AP_HAL::millis();
-    update_handshake();
-    if (_ez_hz == 0 || (now - _node_status_last_send_ms) < uint32_t(1000 / _ez_hz)) {
+    if (now - _node_status_last_send_ms < 1000) {
         return;
     }
     _node_status_last_send_ms = now;
     node_status_msg.uptime_sec = now / 1000;
     node_status.broadcast(node_status_msg);
-
-    // send simple heartbeat frame on all interfaces if handshake complete
-    if (_hb_state == HBState::HANDSHAKE_DONE) {
-        AP_HAL::CANFrame hb_frame{};
-        uint32_t hb_id = 0x0C010000u |
-                         ((uint32_t(_mcu_id.get()) & 0xFF) << 8) |
-                         (uint32_t(_vcu_id.get()) & 0xFF);
-        hb_frame.id = hb_id | AP_HAL::CANFrame::FlagEFF;
-
-        uint16_t topic = _ez_tpc.get();
-        uint8_t esc_index = constrain_int16(_ez_esc.get(), 1, DRONECAN_SRV_NUMBER) - 1;
-        uint16_t esc_value = scale_esc_output(esc_index);
-
-        hb_frame.data[0] = topic & 0xFF;
-        hb_frame.data[1] = topic >> 8;
-        hb_frame.data[2] = esc_value & 0xFF;
-        hb_frame.data[3] = esc_value >> 8;
-        hb_frame.data[4] = hal.util->get_soft_armed() ? 0x03 : 0x02;
-        hb_frame.data[5] = 0;
-        hb_frame.data[6] = 0;
-        hb_frame.data[7] = _hb_seq++;
-
-        hb_frame.dlc = AP_HAL::CANFrame::dataLengthToDlc(8);
-
-        canard_iface.write_aux_frame(hb_frame, 1000);
-    }
 
     if (option_is_set(Options::ENABLE_STATS)) {
         // also send protocol and can stats
@@ -2045,7 +2019,7 @@ void AP_DroneCAN::send_ez_cmd(void)
 	if (_ez_hz == 0 || (now - _ez_status_last_send_ms) < uint32_t(1000 / _ez_hz)) {
         return;
     }
-	_ez_status_last_send_ms = now;
+	_ez_cmd_last_send_ms = now;
 	    // send simple heartbeat frame on all interfaces
     {
         AP_HAL::CANFrame hb_frame{};
