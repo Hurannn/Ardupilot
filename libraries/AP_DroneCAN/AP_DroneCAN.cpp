@@ -176,36 +176,37 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
     // @Description: First byte of heartbeat CAN ID
     // @Range: 0 255
     // @User: Advanced
-    AP_GROUPINFO("VCU_ID", 24, AP_DroneCAN, _vcu_id, 0),
+    AP_GROUPINFO("VCU_ID", 24, AP_DroneCAN, _vcu_id, 208), // 80+128=208
 
-    // @Param: MCU_ID
+    // @Param: MCU1ID
     // @DisplayName: Heartbeat CAN ID second byte
     // @Description: Second byte of heartbeat CAN ID
     // @Range: 0 255
     // @User: Advanced
-    AP_GROUPINFO("MCU_ID", 25, AP_DroneCAN, _mcu_id, 0),
+    AP_GROUPINFO("MCU1ID", 25, AP_DroneCAN, _mcu_id[0], 239), // 111+128=239
+	
+	// @Param: MCU2ID
+    // @DisplayName: Heartbeat CAN ID second byte
+    // @Description: Second byte of heartbeat CAN ID
+    // @Range: 0 255
+    // @User: Advanced
+    AP_GROUPINFO("MCU2ID", 26, AP_DroneCAN, _mcu_id[1], 240), // 112+128=240
 
     // @Param: EZ_HZ
     // @DisplayName: Heartbeat rate
-    // @Description: Frequency to send heartbeat on CAN
+    // @Description: Frequency to send command on CAN
     // @Range: 0 50
     // @Units: Hz
     // @User: Advanced
-    AP_GROUPINFO("EZ_HZ", 26, AP_DroneCAN, _ez_hz, 1),
-
-    // @Param: EZ_ESC
-    // @DisplayName: ESC channel for heartbeat payload
-    // @Description: ESC index whose output value is sent in the heartbeat payload
-    // @Range: 1 32
+    AP_GROUPINFO("EZ_HZ", 27, AP_DroneCAN, _ez_hz, 20),
+	
+	// @Param: EZ_TPC
+    // @DisplayName: Target Phase Current
+    // @Description: Target Torque
+    // @Range: -32000 32000
+	// @Units: 0.1 A
     // @User: Advanced
-    AP_GROUPINFO("EZ_ESC", 27, AP_DroneCAN, _ez_esc, 1),
-
-    // @Param: EZ_TPC
-    // @DisplayName: Heartbeat topic ID
-    // @Description: Two byte value placed in the first two bytes of the heartbeat payload
-    // @Range: 0 65535
-    // @User: Advanced
-    AP_GROUPINFO("EZ_TPC", 28, AP_DroneCAN, _ez_tpc, 0),
+    AP_GROUPINFO("EZ_TPC", 28, AP_DroneCAN, _ez_tpc, 1000),
 
 #if AP_DRONECAN_SERIAL_ENABLED
     /*
